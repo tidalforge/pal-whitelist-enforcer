@@ -21,7 +21,7 @@ This tool is currently designed and tested to work with the Steam Palworld Dedic
 
 ### Prerequisites
 
-- Go 1.23 or higher.
+- Go 1.25 or higher.
 - A Palworld Server with the REST API enabled.
 - **PalWorldSettings.ini** configuration:
   - `AdminPassword` must be set.
@@ -34,7 +34,14 @@ RESTApiEnabled=True
 ```
 
 ### Installation
+#### No Build
+1. Go to releases: https://github.com/tidalforge/pal-whitelist-enforcer/releases
+2. Under Assets, download the program depending on your host OS
+3. Extract anywhere then run the program included.
+> Note: Don't forget to set `RESTApiEnabled=True`, and `AdminPassword="admin"`, in your PalWorldSettings.ini
 
+
+#### Manual Building
 1. Clone the repository or download the source code.
 2. Install dependencies:
    ```bash
