@@ -23,6 +23,15 @@ This tool is currently designed and tested to work with the Steam Palworld Dedic
 
 - Go 1.23 or higher.
 - A Palworld Server with the REST API enabled.
+- **PalWorldSettings.ini** configuration:
+  - `AdminPassword` must be set.
+  - `RESTApiEnabled` must be set to `True`.
+
+Example `PalWorldSettings.ini` settings:
+```ini
+AdminPassword="your_pal_server_password"
+RESTApiEnabled=True
+```
 
 ### Installation
 
