@@ -23,5 +23,5 @@ go.work.sum
 .vscode/
 
 # Project specific ignores
-config.ini
+# config.ini is tracked as a template
 pending.txt
