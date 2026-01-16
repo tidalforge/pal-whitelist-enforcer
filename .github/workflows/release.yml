@@ -34,12 +34,17 @@ jobs:
             BINARY_NAME="${BINARY_NAME}.exe"
           fi
           GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o "${BINARY_NAME}" main.go
-          ARCHIVE_NAME="${BINARY_NAME}_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz"
           if [ ! -f config.ini ]; then
             echo "Creating default config.ini for archive"
             printf "[server]\nhost = 127.0.0.1\nport = 8212\nusername = admin\npassword = your_pal_server_password\ncheck_interval = 5s\n\n[enforcer]\nport = 8080\nwhitelist_file = whitelist.txt\npending_file = pending.txt\nnon_whitelist_action = pending\nmin_autowhitelist_user = 1\nkick_message = you are not whitelisted\nban_message = request access to your friend or owner\n" > config.ini
           fi
-          tar -czf "${ARCHIVE_NAME}" "${BINARY_NAME}" config.ini
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            ARCHIVE_NAME="pal_whitelist_enforcer_${{ matrix.goos }}_${{ matrix.goarch }}.zip"
+            zip "${ARCHIVE_NAME}" "${BINARY_NAME}" config.ini
+          else
+            ARCHIVE_NAME="${BINARY_NAME}_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz"
+            tar -czf "${ARCHIVE_NAME}" "${BINARY_NAME}" config.ini
+          fi
           sha256sum "${ARCHIVE_NAME}" > "${ARCHIVE_NAME}.sha256"
 
       - name: Release
@@ -48,6 +53,7 @@ jobs:
         with:
           files: |
             *.tar.gz
+            *.zip
             *.sha256
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
