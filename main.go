@@ -292,6 +292,17 @@ func pendingHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(pending)
 }
 
+func whitelistHandler(w http.ResponseWriter, r *http.Request) {
+	whitelistLock.RLock()
+	defer whitelistLock.RUnlock()
+	w.Header().Set("Content-Type", "application/json")
+	var list []string
+	for id := range whitelist {
+		list = append(list, id)
+	}
+	json.NewEncoder(w).Encode(list)
+}
+
 func permitHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -311,6 +322,13 @@ func permitHandler(w http.ResponseWriter, r *http.Request) {
 	whitelist[params.UserId] = true
 	whitelistLock.Unlock()
 	saveWhitelist()
+
+	// Try to unban the user in case they were banned
+	log.Printf("Unbanning user %s...", params.UserId)
+	_, err = palRequest("POST", "/unban", PalServerUserActionParams{UserId: params.UserId})
+	if err != nil {
+		log.Printf("Failed to unban user %s: %v (they might not have been banned)", params.UserId, err)
+	}
 
 	// Remove from pending
 	pendingLock.Lock()
@@ -352,6 +370,7 @@ func main() {
 	// Start HTTP server
 	http.HandleFunc("/v1/api/info", infoHandler)
 	http.HandleFunc("/v1/api/pending/", pendingHandler)
+	http.HandleFunc("/v1/api/whitelist/", whitelistHandler)
 	http.HandleFunc("/v1/api/permit/", permitHandler)
 
 	addr := fmt.Sprintf(":%d", config.EnforcerPort)

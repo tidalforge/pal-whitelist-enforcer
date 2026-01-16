@@ -21,7 +21,7 @@ This tool is currently designed and tested to work with the Steam Palworld Dedic
 
 ### Prerequisites
 
-- Go 1.25 or higher.
+- Go 1.23 or higher.
 - A Palworld Server with the REST API enabled.
 
 ### Installation
@@ -84,6 +84,9 @@ Returns the status and uptime of the enforcer.
 
 ### `GET /v1/api/pending/`
 Returns a JSON list of User IDs that are currently in the pending list.
+
+### `GET /v1/api/whitelist/`
+Returns a JSON list of User IDs that are currently in the whitelist.
 
 ### `POST /v1/api/permit/`
 Adds a user to the whitelist.

@@ -1,0 +1,45 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [windows, linux, darwin]
+        goarch: [amd64, arm64]
+        exclude:
+          - goos: windows
+            goarch: arm64
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+
+      - name: Build
+        run: |
+          BINARY_NAME=pal_whitelist_enforcer
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            BINARY_NAME="${BINARY_NAME}.exe"
+          fi
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o "${BINARY_NAME}" main.go
+          tar -czf "${BINARY_NAME}_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz" "${BINARY_NAME}"
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: "*.tar.gz"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
