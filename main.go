@@ -68,9 +68,34 @@ var (
 // --- Logic ---
 
 func loadConfig() {
-	cfg, err := ini.Load("config.ini")
+	configPath := "config.ini"
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		log.Printf("config.ini not found, creating default one...")
+		cfg := ini.Empty()
+		server := cfg.Section("server")
+		server.Key("host").SetValue("127.0.0.1")
+		server.Key("port").SetValue("8212")
+		server.Key("username").SetValue("admin")
+		server.Key("password").SetValue("your_pal_server_password")
+		server.Key("check_interval").SetValue("5s")
+
+		enforcer := cfg.Section("enforcer")
+		enforcer.Key("port").SetValue("8080")
+		enforcer.Key("whitelist_file").SetValue("whitelist.txt")
+		enforcer.Key("pending_file").SetValue("pending.txt")
+		enforcer.Key("non_whitelist_action").SetValue("pending")
+		enforcer.Key("min_autowhitelist_user").SetValue("1")
+		enforcer.Key("kick_message").SetValue("you are not whitelisted")
+		enforcer.Key("ban_message").SetValue("request access to your friend or owner")
+
+		if err := cfg.SaveTo(configPath); err != nil {
+			log.Printf("Error saving default config: %v", err)
+		}
+	}
+
+	cfg, err := ini.Load(configPath)
 	if err != nil {
-		log.Printf("Warning: Fail to read config.ini: %v. Using defaults.", err)
+		log.Printf("Warning: Fail to read config.ini: %v. Using hardcoded defaults.", err)
 		cfg = ini.Empty()
 	}
 
